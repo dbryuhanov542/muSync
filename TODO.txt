@@ -1,0 +1,3 @@
+# TODO: Queueing files to download before it starts
+# TODO: (Maybe) Simplify download_ftp_tree func, add subfunction for it
+# TODO: Try to host ftp-server on pc
