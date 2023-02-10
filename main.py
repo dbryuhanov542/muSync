@@ -12,7 +12,7 @@ ftp = FTP()
 # 
 
 dest_dir = 'D:\hello'
-remote_dir = 'test 123'
+remote_dir = 'Music'
 
 # 
 # Functions
@@ -58,27 +58,39 @@ def _mirror_ftp_dir(remote_path, dest_curdir):  # Mirrors directory from ftp to 
         print('created dir: {0}'.format(mirrored_dir))
 
 
-# def calculate_usage_of_space(ftp_data, remote_path, dest_path, overall_size):
-#     original_ftp_dir = ftp_data.pwd()
-#     for name in ftp_data.nlst():
-#         if _is_ftp_dir(ftp, name):
-#             ftp.cwd(name)
-#             original_os_dir = os.getcwd()
-#             calculate_usage_of_space(ftp, name, dest_dir + '\\' + name, overall_size)
-#             ftp.cwd(original_ftp_dir)
-#         else:
-#             if _check_if_contains_local(name, dest_path) == False:
-#                 overall_size += ftp.size(name)
-#             print(overall_size)
-#             ftp_data.cwd(original_ftp_dir)
-#             pass
-#             return overall_size
+def _get_local_usage(local_dict):
+    parrent_of_parrent_dir = os.getcwd()
+    for name in os.listdir():
+        if os.path.isdir(name):
+            parrent_dir = os.getcwd()
+            os.chdir(name)
+            _get_local_usage(local_dict)
+            os.chdir(parrent_dir)
+        else:
+            local_dict[name] = os.stat(name).st_size
+            os.chdir(parrent_of_parrent_dir)
+            pass
+    return local_dict
+
+def _get_ftp_usage(ftp_data, ftp_dict):
+    parrent_of_parrent_dir = ftp_data.pwd()
+    for name in ftp_data.nlst():
+        if _is_ftp_dir(ftp_data, name):
+            parrent_dir = ftp_data.pwd()
+            ftp_data.cwd(name)
+            _get_ftp_usage(ftp_data, ftp_dict)
+            ftp_data.cwd(parrent_dir)
+        else:
+            ftp_dict[name] = ftp_data.size(name)
+            ftp_data.cwd(parrent_of_parrent_dir)
+            pass
+    return ftp_dict
 
 
-def human_read_format(size):
-    pwr = math.floor(math.log(size, 1024))
-    suff = ['B', 'KB', 'MB', 'GB']
-    return f"{size / 1024 ** pwr:.0f}{suff[pwr]}"
+def calculate_usage_of_space(local_dict, ftp_dict):
+    dict_to_download = { k : local_dict[k] for k in set(ftp_dict) - set(local_dict)}
+    overall_disk_usage = format(sum.dict_to_download.values() / 1024 / 1024) + 'MB'
+    return overall_disk_usage
 
 
 def _download_ftp_file(ftp_data, filename, dest_path):  # Downloads single file
@@ -121,6 +133,8 @@ if __name__ == '__main__':
     print('Connection opened')
     os.chdir(dest_dir)
     ftp.cwd(remote_dir)
-    # print(calculate_usage_of_space(ftp, remote_dir, dest_dir))
-    download_ftp_tree(ftp, remote_dir, dest_dir)
+    local_dict = {}
+    ftp_dict = {}
+    print(calculate_usage_of_space(_get_local_usage(local_dict), _get_ftp_usage(ftp, ftp_dict)))
+    # download_ftp_tree(ftp, remote_dir, dest_dir)
     print("Downloading success")
