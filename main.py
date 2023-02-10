@@ -3,9 +3,6 @@ import os
 from ftplib import *
 import sys
 
-# TODO: Queueing files to download before it starts
-# TODO: (Maybe) Simplify download_ftp_tree func, add subfunction for it
-
 ftp = FTP()
 
 
@@ -20,7 +17,6 @@ remote_dir = 'Music'
 # Functions
 # 
 
-# TODO: Try to host ftp-server on pc
 def _open_conn(ftp_data):   # Tries to open connection to ftp-server
     try:
         ftp.connect('192.168.0.100', 2121)
@@ -83,8 +79,6 @@ def download_ftp_tree(ftp_data, remote_path, dest_path):    # Checking for direc
 
 # 
 # Main executions
-# 
-
 if __name__ == '__main__':
     _open_conn(ftp)
     print('Connection opened')
