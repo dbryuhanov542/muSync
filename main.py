@@ -3,6 +3,9 @@ import os
 from ftplib import *
 import sys
 
+# TODO: Queueing files to download before it starts
+# TODO: (Maybe) Simplify download_ftp_tree func, add subfunction for it
+
 ftp = FTP()
 
 
@@ -13,12 +16,12 @@ ftp = FTP()
 dest_dir = 'D:\hello'
 remote_dir = 'Music'
 
-
 # 
-# Tries to open connection to ftp-server
-# TODO: Try to host ftp-server on pc
+# Functions
+# 
 
-def _open_conn(ftp_data):
+# TODO: Try to host ftp-server on pc
+def _open_conn(ftp_data):   # Tries to open connection to ftp-server
     try:
         ftp.connect('192.168.0.100', 2121)
     except Exception as message:
@@ -29,11 +32,7 @@ def _open_conn(ftp_data):
         print('Authentication and encode success')
 
 
-# 
-# Determines if a directory is a directory
-#
-
-def _is_ftp_dir(ftp_data, remote_path):
+def _is_ftp_dir(ftp_data, remote_path): # Determines if a directory is a directory
     original_cwd = ftp_data.pwd()
     try:
         ftp_data.cwd(remote_path)
@@ -45,11 +44,7 @@ def _is_ftp_dir(ftp_data, remote_path):
         return False
 
 
-# 
-# Mirrors directory from ftp to local machine
-# 
-
-def _mirror_ftp_dir(remote_path, dest_curdir):
+def _mirror_ftp_dir(remote_path, dest_curdir):  # Mirrors directory from ftp to local machine
     mirrored_dir = os.path.join(dest_curdir, remote_path)
     print('Trying to make mirror: ' + mirrored_dir)
     if not os.path.exists(mirrored_dir):
@@ -57,11 +52,7 @@ def _mirror_ftp_dir(remote_path, dest_curdir):
         print('created dir: {0}'.format(mirrored_dir))
 
 
-# 
-# Downloads single file
-# 
-
-def _download_ftp_file(ftp_data, filename, dest_path):
+def _download_ftp_file(ftp_data, filename, dest_path):  # Downloads single file
     try:
         print('Downloading: {0}'.format(filename))
         ftp_data.retrbinary('RETR {0}'.format(filename), open(filename, 'wb').write)
@@ -70,11 +61,7 @@ def _download_ftp_file(ftp_data, filename, dest_path):
         print('Failed: {0}'.format(message))
 
 
-# 
-# Checking for directories/files, than downloads contents
-# 
-
-def download_ftp_tree(ftp_data, remote_path, dest_path):
+def download_ftp_tree(ftp_data, remote_path, dest_path):    # Checking for directories/files, than downloads contents
     original_ftp_dir = ftp_data.pwd()
     for name in ftp_data.nlst():
         if _is_ftp_dir(ftp, name):
@@ -94,6 +81,9 @@ def download_ftp_tree(ftp_data, remote_path, dest_path):
             print('back to: ' + original_ftp_dir)
             pass
 
+# 
+# Main executions
+# 
 
 if __name__ == '__main__':
     _open_conn(ftp)
